@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Placeholder for real Amp worker (docs/plan.md §12).
+set -euo pipefail
+echo "[agentic-worker-amp] stub argv: $*"
+echo "[agentic-worker-amp] Install amp CLI and map -x-from to amp -x \"\$(cat file)\""

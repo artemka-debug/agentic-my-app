@@ -1,0 +1,66 @@
+version: 1
+
+execution:
+  mode: local-only
+  harness: cursor
+  sandbox: worktree
+  max_parallel_workers: 4
+  default_timeout_minutes: 45
+  allow_cloud_execution: false
+
+sources:
+  github:
+    enabled: true
+    default_repo: owner/repo
+    token_env: GITHUB_TOKEN
+
+gates:
+  require_approval_after_requirements: true
+  require_approval_after_decomposition: true
+  allow_no_gate_mode: true
+  require_approval_before_pr: false
+  require_approval_before_review_replies: true
+
+workers:
+  backends:
+    - id: cursor-local
+      command: cursor-agent-local
+      enabled: true
+    - id: mini-swe-agent
+      command: mini-swe-agent run
+      enabled: true
+    - id: swe-agent
+      command: swe-agent run
+      enabled: false
+  selection_strategy: diverse-parallel
+
+verification:
+  required:
+    - lint
+    - unit
+  commands:
+    lint: npm run lint
+    unit: npm test
+
+security:
+  secret_scan: true
+  dependency_audit: true
+  github_token_min_scope: true
+  redact_patterns:
+    - 'ghp_[A-Za-z0-9_]+'
+    - 'sk-[A-Za-z0-9]+'
+
+github:
+  pr:
+    draft_until_verified: true
+    branch_prefix: agentic/
+    labels:
+      - agentic
+    reviewers: []
+    auto_link_issue: true
+
+monitoring:
+  enabled: true
+  interval_seconds: 120
+  fix_clear_ci_failures: true
+  respond_to_comments: approval-required

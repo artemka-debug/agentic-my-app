@@ -1,0 +1,68 @@
+# Copy to repository root as `.cursor-agent-workflow.yaml` and adjust commands/paths
+# for your stack. See README in this folder for installation.
+
+workflow:
+  localOnly: true
+  sourcePriority:
+    - github-issue
+    - direct-prompt
+  successArtifact: github-pr
+
+gates:
+  requireApprovalAfterRequirements: false
+  requireApprovalAfterDecomposition: true
+  requireApprovalBeforePr: false
+  allowNoGateMode: true
+
+implementation:
+  strategy: best-of-n
+  candidateCount: 3
+  maxRepairAttemptsPerCandidate: 2
+  diversity:
+    - minimal
+    - test-first
+    - robust-edge-cases
+
+worktrees:
+  root: "../.agent-worktrees"
+  branchPrefix: "agent"
+  cleanupRejected: false
+  cleanupAfterPrMerge: true
+
+verification:
+  requireAllMustRequirementsCovered: true
+  commands:
+    lint: "pnpm lint"
+    typecheck: "pnpm typecheck"
+    unit: "pnpm test"
+    integration: "pnpm test:integration"
+    build: "pnpm build"
+    browser: "pnpm test:e2e"
+  browser:
+    enabled: true
+    devServerCommand: "pnpm dev"
+    url: "http://localhost:3000"
+
+security:
+  requireReview: true
+  blockOnHighSeverity: true
+  dependencyAuditCommand: "pnpm audit"
+
+github:
+  defaultBaseBranch: "main"
+  draftPr: false
+  linkIssue: true
+  useGhCli: true
+
+prMonitor:
+  enabled: true
+  intervalSeconds: 120
+  maxDurationMinutes: 240
+  autoFixClearFailures: true
+  requireApprovalForBehaviorChanges: true
+
+artifacts:
+  root: ".agent-workflows"
+  keepCommandLogs: true
+  keepBrowserScreenshots: true
+  keepRejectedCandidates: true

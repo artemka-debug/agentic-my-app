@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: agentic-local-orchestrator
+Version: 0.1.0
+Summary: Local Cursor harness orchestrator skeleton (OpenHands runtime adapters).
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pyyaml>=6.0

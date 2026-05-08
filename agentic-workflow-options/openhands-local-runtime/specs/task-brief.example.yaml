@@ -1,0 +1,12 @@
+task_brief:
+  source:
+    type: github_issue
+    repo: owner/repo
+    issue: 123
+  problem: |
+    <issue body summary>
+  user_goal: <short headline / title>
+  known_constraints:
+    labels: []
+  ambiguity: []
+  repo_context_needed: []

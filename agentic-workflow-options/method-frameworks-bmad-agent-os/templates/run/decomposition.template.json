@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "candidate_strategy": "hybrid",
+  "task_groups": [],
+  "dependencies": [],
+  "conflicts": [],
+  "verification_plan": {
+    "per_group": [],
+    "global": []
+  },
+  "worktree_plan": {
+    "naming_convention": "agentic/<issue-number>-<slug>/<candidate-id>",
+    "notes": "Populate task_groups before implementation."
+  }
+}

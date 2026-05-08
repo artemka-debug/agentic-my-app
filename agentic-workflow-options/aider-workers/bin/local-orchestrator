@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+#
+# Local Cursor harness helper (Phases 1–3): GitHub intake, TaskBrief, requirements
+# stubs, decomposition stubs, approval template.
+#
+# Usage: run from the target git repository root (where .orchestrator/ should appear).
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export ORC_HOME="$ROOT"
+
+# shellcheck source=../lib/common.sh
+source "${ROOT}/lib/common.sh"
+# shellcheck source=../lib/phase1_issue.sh
+source "${ROOT}/lib/phase1_issue.sh"
+# shellcheck source=../lib/phase2_requirements.sh
+source "${ROOT}/lib/phase2_requirements.sh"
+# shellcheck source=../lib/phase3_decompose.sh
+source "${ROOT}/lib/phase3_decompose.sh"
+
+usage() {
+  cat <<'EOF'
+local-orchestrator — local harness scaffolding (Phases 1–3)
+
+Commands:
+  issue <spec> [--repo ORG/REPO] [--autonomy MODE] [--no-approval-gates] [--phase1-only | --stop-after-requirements]
+
+    Fetch GitHub issue via `gh`, write TaskBrief + run state (Phase 1).
+
+    Defaults: also scaffolds Phases 2–3 stubs unless limited by flags:
+
+    --phase1-only              Only Phase 1 (task-brief.json, events, snapshots).
+    --stop-after-requirements  Phases 1–2 only (requirements stubs, no decomposition).
+
+    <spec> may be:
+      org/repo#123
+      https://github.com/org/repo/issues/123
+      123   (requires --repo org/repo)
+
+  requirements <run-directory>
+    (Re)generate requirements stubs from task-brief.json (Phase 2).
+
+  decompose <run-directory>
+    (Re)generate decomposition / work-packages / approval (Phase 3).
+
+  status <run-directory>
+    Print state.json and latest events.
+
+Environment:
+  ORC_HOME   Path to this aider-workers package (set automatically).
+
+Paths (created under cwd):
+  .orchestrator/runs/<run-id>/...
+
+Examples:
+  local-orchestrator issue myorg/myrepo#42
+  local-orchestrator issue https://github.com/myorg/myrepo/issues/42 --autonomy balanced
+  local-orchestrator issue 42 --repo myorg/myrepo
+EOF
+}
+
+parse_issue_spec() {
+  local raw="${1:?}"
+  local out_repo=""
+  local out_num=""
+
+  if [[ "$raw" =~ ^https://github\.com/([^/]+)/([^/]+)/issues/([0-9]+)$ ]]; then
+    out_repo="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+    out_num="${BASH_REMATCH[3]}"
+  elif [[ "$raw" =~ ^([^/]+)/([^/#]+)#([0-9]+)$ ]]; then
+    out_repo="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+    out_num="${BASH_REMATCH[3]}"
+  elif [[ "$raw" =~ ^#?([0-9]+)$ ]]; then
+    out_num="${BASH_REMATCH[1]}"
+  else
+    die "could not parse issue spec: ${raw}"
+  fi
+  printf '%s\t%s\n' "$out_repo" "$out_num"
+}
+
+cmd_issue() {
+  local spec autonomy="balanced"
+  local repo_override=""
+  local no_gates="false"
+  local followup_phase2="true"
+  local followup_phase3="true"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --repo)
+        repo_override="${2:?}"
+        shift 2
+        ;;
+      --autonomy)
+        autonomy="${2:?}"
+        shift 2
+        ;;
+      --no-approval-gates)
+        no_gates="true"
+        shift 1
+        ;;
+      --stop-after-requirements)
+        followup_phase3="false"
+        shift 1
+        ;;
+      --no-followup | --phase1-only)
+        followup_phase2="false"
+        followup_phase3="false"
+        shift 1
+        ;;
+      -*)
+        die "unknown flag: $1"
+        ;;
+      *)
+        [[ -z "${spec:-}" ]] || die "unexpected extra argument: $1"
+        spec="$1"
+        shift
+        ;;
+    esac
+  done
+
+  [[ -n "${spec:-}" ]] || die "missing issue spec"
+
+  local line repo num
+  line="$(parse_issue_spec "$spec")"
+  repo="${line%%$'\t'*}"
+  num="${line#*$'\t'}"
+
+  if [[ -z "$repo" ]]; then
+    [[ -n "$repo_override" ]] || die "numeric issue requires --repo org/repo"
+    repo="$repo_override"
+  fi
+
+  local run_dir
+  run_dir="$(phase1_issue "$repo" "$num" "$autonomy" "$no_gates")"
+
+  if [[ "$followup_phase2" == "true" ]]; then
+    phase2_requirements "$run_dir"
+  fi
+  if [[ "$followup_phase3" == "true" ]]; then
+    [[ "$followup_phase2" == "true" ]] || die "cannot run decomposition without Phase 2; omit --phase1-only"
+    phase3_decompose "$run_dir"
+  fi
+
+  printf 'Run initialized: %s\n' "$(basename "$run_dir")"
+  printf 'Artifacts directory: %s\n' "$(cd "$(dirname "${run_dir}")" && pwd)/$(basename "$run_dir")"
+}
+
+cmd_requirements() {
+  local d="${1:?run directory}"
+  d="${d#./}"
+  phase2_requirements "$d"
+  printf 'Updated requirements stubs in %s\n' "$d"
+}
+
+cmd_decompose() {
+  local d="${1:?run directory}"
+  d="${d#./}"
+  phase3_decompose "$d"
+  printf 'Updated decomposition stubs in %s\n' "$d"
+}
+
+cmd_status() {
+  local d="${1:?run directory}"
+  d="${d#./}"
+  [[ -f "${d}/state.json" ]] || die "missing state.json under ${d}"
+  echo "--- state.json ---"
+  cat "${d}/state.json" | jq .
+  [[ -f "${d}/events.jsonl" ]] || return 0
+  echo "--- last events (up to 5) ---"
+  tail -n 5 "${d}/events.jsonl" | jq -s '.'
+}
+
+main() {
+  local cmd="${1:-}"
+  shift || true
+  case "${cmd:-}" in
+    "" | -h | --help)
+      usage
+      ;;
+    issue)
+      cmd_issue "$@"
+      ;;
+    requirements)
+      cmd_requirements "$@"
+      ;;
+    decompose)
+      cmd_decompose "$@"
+      ;;
+    status)
+      cmd_status "$@"
+      ;;
+    *)
+      die "unknown command: ${cmd}"
+      ;;
+  esac
+}
+
+main "$@"

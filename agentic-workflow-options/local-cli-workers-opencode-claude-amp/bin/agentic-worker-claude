@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Placeholder for real Claude Code worker (docs/plan.md §12).
+set -euo pipefail
+echo "[agentic-worker-claude] stub argv: $*"
+echo "[agentic-worker-claude] Install claude CLI and map --print-from to claude --print \"\$(cat file)\""

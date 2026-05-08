@@ -1,0 +1,81 @@
+# Example agentic workflow config. Copy to your repo as `.agentic/config.yaml` and customize.
+# Validate against `schemas/config.schema.json` in this package (JSON Schema 2020-12).
+
+workflow:
+  local_only: true
+  default_source: github
+  default_depth: standard
+  candidate_strategy: hybrid
+  max_parallel_candidates: 3
+
+approval:
+  required_after_decomposition: true
+  required_before_pr: false
+  allow_autorun_for_low_risk: true
+  max_autonomy_risk: medium
+
+github:
+  default_base_branch: main
+  branch_prefix: agentic
+  pr_draft_by_default: false
+  link_issue: true
+  monitor_after_open: true
+  monitor_interval_seconds: 300
+
+worktrees:
+  root: ../.agentic-worktrees
+  cleanup_on_success: false
+  cleanup_on_failure: false
+
+verification:
+  required:
+    - lint
+    - typecheck
+    - unit
+    - integration
+    - code_review
+    - security_review
+    - po_acceptance
+    - requirement_traceability
+  optional:
+    - browser
+    - dependency_audit
+    - build
+  commands:
+    lint: npm run lint
+    typecheck: npm run typecheck
+    unit: npm test
+    integration: npm run test:integration
+    browser: npm run test:e2e
+    build: npm run build
+
+security:
+  severity_blocking:
+    - critical
+    - high
+  check_dependencies: true
+  check_secrets: true
+
+traceability:
+  require_requirement_ids: true
+  require_test_mapping: true
+  require_po_acceptance: true
+
+agents:
+  po:
+    framework: bmad
+  spec:
+    framework: agent-os
+  decomposition:
+    framework: agent-os
+  implementation:
+    count: auto
+  verifier:
+    require_independent_context: true
+
+retry:
+  max_candidate_retries: 2
+  max_verification_loops: 3
+  max_pr_comment_fix_loops: 5
+  stop_on_security_high: true
+  stop_on_unresolved_po_failure: true

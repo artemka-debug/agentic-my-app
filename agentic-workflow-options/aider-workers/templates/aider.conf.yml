@@ -1,0 +1,23 @@
+auto-commits: false
+dirty-commits: false
+attribute-author: false
+attribute-committer: false
+analytics: false
+pretty: true
+stream: true
+yes-always: false
+gitignore: true
+
+read:
+  - README.md
+  - package.json
+
+lint-cmd: npm run lint
+test-cmd: npm test
+
+model: ${AIDER_MODEL}
+editor-model: ${AIDER_EDITOR_MODEL}
+
+map-tokens: 2048
+auto-lint: false
+auto-test: false

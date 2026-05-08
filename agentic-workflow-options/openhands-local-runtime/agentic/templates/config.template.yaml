@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+# Copy into target repo `.agentic/config.yaml` (`agentic init-config`).
+version: 1
+
+harness:
+  type: cursor
+  state_dir: .agentic/runs
+
+source:
+  default: github_issue
+
+approval:
+  decomposition: required
+  before_pr: required
+  mode: gated # gated | autonomous
+
+runtime:
+  default_engine: openhands-docker
+  engines:
+    openhands-docker:
+      enabled: true
+      image: local/agent-runtime:latest
+      workspace_mount: /workspace
+      network: restricted
+      memory: 8g
+      cpus: 4
+    openhands-local:
+      enabled: true
+      require_explicit_selection: true
+      command_policy: strict
+    cursor-local:
+      enabled: true
+
+fanout:
+  max_parallel_agents: 4
+  strategy: hybrid
+
+verification:
+  required:
+    - lint
+    - typecheck
+    - unit
+    - integration
+    - browser
+    - code_review
+    - security_review
+    - po_coverage
+  commands:
+    lint: npm run lint
+    typecheck: npm run typecheck
+    unit: npm test
+    integration: npm run test:integration
+    browser: npm run test:e2e
+
+retry:
+  max_candidate_attempts: 3
+  max_verifier_loops: 3
+  max_pr_followups: 10
+  flaky_test_reruns: 2
+  allow_runtime_fallback: true
+
+github:
+  use_gh_cli: true
+  pr_draft: false
+  monitor_ci: true
+  monitor_reviews: true

@@ -1,0 +1,83 @@
+version: 1
+
+localOnly: true
+
+github:
+  owner: ""
+  repo: ""
+  defaultBaseBranch: main
+  auth: gh-cli
+  issueLabels:
+    include: []
+    exclude: []
+  pr:
+    draftByDefault: false
+    autoCreate: true
+    autoRespondToComments: false
+    autoMerge: false
+
+models:
+  defaultProvider: ollama
+  providers:
+    ollama:
+      baseUrl: http://localhost:11434
+      model: qwen2.5-coder
+  roles:
+    productOwner:
+      provider: ollama
+      model: qwen2.5-coder
+    implementer:
+      provider: ollama
+      model: qwen2.5-coder
+    verifier:
+      provider: ollama
+      model: qwen2.5-coder
+
+workflow:
+  sourceAdapters:
+    - github
+    - manual
+  approval:
+    afterSpec: optional
+    afterDecomposition: required
+    beforePR: optional
+  autonomy:
+    mode: balanced
+    allowNoGateRun: true
+    maxCandidates: 4
+    maxRetriesPerCandidate: 2
+    maxTotalRuntimeMinutes: 180
+
+worktrees:
+  root: ../agentic-worktrees
+  cleanup: ask
+  keepFailedCandidates: true
+
+commands:
+  install: ""
+  formatCheck: ""
+  lint: ""
+  typecheck: ""
+  unit: ""
+  integration: ""
+  browser: ""
+  build: ""
+  security: []
+
+verification:
+  requireAllCommandsPass: true
+  requireSecurityPass: true
+  requirePOAcceptance: true
+  requireRequirementCoverage: true
+  allowOverride: true
+
+roles:
+  promptsDir: .agentic/prompts
+  customRolesDir: .agentic/roles
+
+prMonitor:
+  enabled: true
+  pollIntervalSeconds: 60
+  fixCiFailures: true
+  fixReviewComments: true
+  requireApprovalForLargeFixes: true
