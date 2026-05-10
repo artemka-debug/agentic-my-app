@@ -1,8 +1,11 @@
 {
   "name": "@artemka-debug/agentic-my-app",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Local-only agentic-my-app CLI using @cursor/sdk (see docs/plan.md)",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist",
     "prompts",
@@ -15,6 +18,7 @@
   "scripts": {
     "build": "tsc",
     "prepack": "npm run build",
+    "release": "semantic-release",
     "global:link": "npm run build && npm link",
     "global:unlink": "npm unlink --global agentic-my-app",
     "dev": "tsx src/cli.ts",
@@ -32,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
+    "semantic-release": "^25.0.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

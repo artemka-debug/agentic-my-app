@@ -56,13 +56,14 @@ npm unlink agentic-my-app # if you npm link'ed into another project
 
 ### npm Publishing
 
-GitHub Actions publishes the package to npm from `.github/workflows/npm-publish.yml` when a GitHub release is published, or when the workflow is run manually.
+GitHub Actions runs semantic-release from `.github/workflows/npm-publish.yml` on every push to `main` and when the workflow is run manually. semantic-release analyzes Conventional Commits, creates the GitHub release/tag, and publishes the package to npm.
 
 Repository setup:
 
 - Add an npm automation token as the GitHub Actions secret `NPM_TOKEN`.
-- Publish a GitHub release for the version in `package.json`, or run the workflow manually with a dist-tag such as `latest`.
-- The workflow runs `npm ci`, `npm run build`, `npm pack --dry-run`, then `npm publish --provenance --access public`.
+- Use Conventional Commits (`feat:`, `fix:`, breaking changes) on changes merged to `main`.
+- The first semantic-release publication starts at `1.0.0` when there is no prior release tag.
+- The workflow runs `npm ci`, `npm run build`, `npm pack --dry-run`, then `npm run release` with npm provenance enabled.
 
 ## Configuration
 
