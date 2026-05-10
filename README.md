@@ -65,6 +65,8 @@ Repository setup:
 - The first semantic-release publication starts at `1.0.0` when there is no prior release tag.
 - The workflow runs `npm ci`, `npm run build`, `npm pack --dry-run`, then `npm run release` with npm provenance enabled.
 
+If a release tag is created but npm publish does not complete, semantic-release will treat that version as already released on the next run. For the initial `1.0.0` recovery case, delete the failed GitHub release/tag `v1.0.0`, then rerun the workflow. Alternatively, keep the tag and merge a new commit so semantic-release publishes the next patch version.
+
 ## Configuration
 
 - Default: `./agentic-my-app.config.yaml`

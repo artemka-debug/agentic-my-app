@@ -1,6 +1,6 @@
 {
   "name": "@artemka-debug/agentic-my-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Local-only agentic-my-app CLI using @cursor/sdk (see docs/plan.md)",
   "publishConfig": {
