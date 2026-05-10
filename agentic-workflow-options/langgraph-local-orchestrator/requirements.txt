@@ -1,7 +1,0 @@
-# Mirrors pyproject.toml runtime deps for pip install -r
-typer>=0.12
-pydantic>=2.6
-PyYAML>=6.0
-SQLAlchemy>=2.0
-langgraph>=0.2
-langchain-core>=0.3

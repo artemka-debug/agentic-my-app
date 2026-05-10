@@ -1,0 +1,38 @@
+{
+  "name": "@artemka-debug/agentic-my-app",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local-only agentic-my-app CLI using @cursor/sdk (see docs/plan.md)",
+  "files": [
+    "dist",
+    "prompts",
+    "docs",
+    "README.md"
+  ],
+  "bin": {
+    "agentic-my-app": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepack": "npm run build",
+    "global:link": "npm run build && npm link",
+    "global:unlink": "npm unlink --global agentic-my-app",
+    "dev": "tsx src/cli.ts",
+    "agentic-my-app": "tsx src/cli.ts",
+    "smoke": "tsx scripts/smoke-sdk.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@cursor/sdk": "^1.0.12",
+    "commander": "^12.1.0",
+    "telegraf": "^4.16.3",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

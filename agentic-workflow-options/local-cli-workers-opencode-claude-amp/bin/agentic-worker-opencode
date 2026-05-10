@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# Placeholder for real OpenCode worker (docs/plan.md §12).
-set -euo pipefail
-echo "[agentic-worker-opencode] stub argv: $*"
-echo "[agentic-worker-opencode] Install opencode and wire this script to: opencode run --prompt-file ..."
