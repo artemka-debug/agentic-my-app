@@ -1,8 +1,12 @@
 {
   "name": "@artemka-debug/agentic-my-app",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Local-only agentic-my-app CLI using @cursor/sdk (see docs/plan.md)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artemka-debug/agentic-my-app.git"
+  },
   "publishConfig": {
     "access": "public"
   },
